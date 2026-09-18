@@ -1,0 +1,961 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Полное руководство по пакетам zhb для Blender 5.2 LTS: сценарии работы, панели, кнопки и поля.">
+<title>Руководство zhb</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%236244CE'/%3E%3Cpath d='M15 19h34L24 45h25' fill='none' stroke='white' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#F4F6F9; --surface:#FFFFFF; --surface-2:#FAFBFC;
+  --ink:#161A21; --ink-2:#3A4251; --muted:#646D7E; --line:#E0E4EB; --line-2:#EDF0F4;
+  --anim:#6244CE; --studio:#0B7480; --physx:#A8540A;
+  --anim-soft:#EFEBFC; --studio-soft:#E4F3F4; --physx-soft:#FAEFE3;
+  --ok:#166534; --warn:#9A5B00;
+  --shadow:0 1px 2px rgba(20,26,40,.05), 0 8px 24px -16px rgba(20,26,40,.25);
+  --display:"Familjen Grotesk","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#111419; --surface:#171B22; --surface-2:#1C212A;
+    --ink:#E9ECF2; --ink-2:#C2C8D4; --muted:#98A1B2; --line:#2A303B; --line-2:#232932;
+    --anim:#A38FF5; --studio:#3FB4BE; --physx:#E0973F;
+    --anim-soft:#221C3B; --studio-soft:#10302F; --physx-soft:#2E2213;
+    --ok:#6FD08C; --warn:#E0B054;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#111419; --surface:#171B22; --surface-2:#1C212A;
+  --ink:#E9ECF2; --ink-2:#C2C8D4; --muted:#98A1B2; --line:#2A303B; --line-2:#232932;
+  --anim:#A38FF5; --studio:#3FB4BE; --physx:#E0973F;
+  --anim-soft:#221C3B; --studio-soft:#10302F; --physx-soft:#2E2213;
+  --ok:#6FD08C; --warn:#E0B054;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -20px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);
+     font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.shell{display:grid;grid-template-columns:290px minmax(0,1fr);gap:0;
+       max-width:1400px;margin:0 auto;align-items:start}
+
+/* ---- masthead ---- */
+.mast{grid-column:1/-1;padding:44px 40px 28px;border-bottom:1px solid var(--line)}
+.mast h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,4vw,44px);
+         line-height:1.05;margin:0 0 10px;letter-spacing:-.02em;text-wrap:balance}
+.mast p{margin:0;max-width:62ch;color:var(--ink-2)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.chip{font-family:var(--mono);font-size:11.5px;padding:3px 9px;border-radius:999px;
+      border:1px solid var(--line);background:var(--surface);color:var(--muted);
+      font-variant-numeric:tabular-nums}
+.chip.anim{color:var(--anim);border-color:var(--anim);background:var(--anim-soft)}
+.chip.studio{color:var(--studio);border-color:var(--studio);background:var(--studio-soft)}
+.chip.physx{color:var(--physx);border-color:var(--physx);background:var(--physx-soft)}
+
+/* ---- nav ---- */
+nav{position:sticky;top:0;max-height:100vh;overflow-y:auto;padding:26px 14px 60px 34px}
+nav .search{width:100%;font-family:var(--mono);font-size:12.5px;padding:8px 10px;
+  border:1px solid var(--line);border-radius:8px;background:var(--surface);
+  color:var(--ink);margin-bottom:16px}
+nav .search::placeholder{color:var(--muted)}
+nav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+nav a{display:block;text-decoration:none;color:var(--ink-2);padding:4px 8px;
+      border-radius:6px;font-size:13.5px;line-height:1.35}
+nav a:hover{background:var(--line-2);color:var(--ink)}
+nav a.h2{font-family:var(--display);font-weight:600;color:var(--ink);margin-top:12px;font-size:14px}
+nav a.h3{padding-left:16px}
+nav a.panel4{padding-left:16px;font-size:13px}
+nav a.panel5{padding-left:28px;font-size:12.5px;color:var(--muted)}
+nav a.panel6{padding-left:40px;font-size:12.5px;color:var(--muted)}
+nav a.on{background:var(--line-2);color:var(--ink);font-weight:500}
+nav a:focus-visible,main a:focus-visible,.search:focus-visible{outline:2px solid var(--anim);outline-offset:2px}
+
+/* ---- content ---- */
+main{padding:26px 40px 120px;min-width:0}
+section{max-width:74ch;margin:0 0 8px}
+h2{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:-.015em;
+   margin:44px 0 14px;padding-top:10px;text-wrap:balance;scroll-margin-top:16px}
+section:first-of-type h2{margin-top:8px}
+h3{font-family:var(--display);font-weight:600;font-size:19px;margin:32px 0 10px;
+   letter-spacing:-.01em;text-wrap:balance;scroll-margin-top:16px}
+p{margin:0 0 12px;max-width:68ch}
+main ul{margin:0 0 14px;padding-left:20px}
+main li{margin:0 0 6px}
+code{font-family:var(--mono);font-size:.88em;background:var(--line-2);
+     padding:1px 5px;border-radius:5px;color:var(--ink)}
+pre{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;margin:0 0 16px}
+pre code{background:none;padding:0;font-size:12.8px;line-height:1.7}
+.table-wrap{overflow-x:auto;margin:0 0 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{text-align:left;font-family:var(--display);font-weight:600;font-size:12px;
+   text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+   padding:10px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 14px;border-bottom:1px solid var(--line-2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td:first-child{font-weight:500}
+
+/* ---- panels ---- */
+.panel{max-width:74ch;background:var(--surface);border:1px solid var(--line);
+       border-left:3px solid var(--tab);border-radius:0 10px 10px 0;
+       margin:0 0 10px;box-shadow:var(--shadow);scroll-margin-top:16px}
+.panel[data-tab="anim"]{--tab:var(--anim);--tab-soft:var(--anim-soft)}
+.panel[data-tab="studio"]{--tab:var(--studio);--tab-soft:var(--studio-soft)}
+.panel[data-tab="physx"]{--tab:var(--physx);--tab-soft:var(--physx-soft)}
+.panel.lvl5{margin-left:18px}
+.panel.lvl6{margin-left:36px}
+.panel-head{padding:12px 18px 10px;display:flex;flex-wrap:wrap;
+            align-items:baseline;gap:10px}
+.panel-head h4{font-family:var(--display);font-weight:600;font-size:16px;margin:0;
+               letter-spacing:-.01em}
+.where{margin:0;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.panel-body{padding:0 18px 14px}
+.panel-body:empty{display:none}
+ul.rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+ul.rows>li{margin:0;padding:9px 0 9px 26px;border-top:1px solid var(--line-2);
+           position:relative;font-size:14px;color:var(--ink-2)}
+ul.rows>li:first-child{border-top:none}
+ul.rows>li strong{color:var(--ink);font-weight:600}
+ul.rows>li code{background:var(--tab-soft);color:var(--tab);font-weight:500}
+ul.rows>li.button::before{content:"";position:absolute;left:6px;top:15px;
+  width:10px;height:10px;border-radius:3px;background:var(--tab)}
+ul.rows>li.field::before{content:"";position:absolute;left:8px;top:17px;
+  width:7px;height:7px;border-radius:999px;border:1.5px solid var(--muted)}
+ul.sub{list-style:none;margin:8px 0 2px;padding:0 0 0 2px;
+       display:flex;flex-direction:column;gap:4px}
+ul.sub li{margin:0;font-size:13px;color:var(--muted);padding-left:12px;
+          border-left:1px solid var(--line)}
+ul.sub li strong{color:var(--ink-2)}
+.panel em{font-style:normal;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.hidden{display:none!important}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 18px;font-size:12.5px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--muted)}
+.legend i.dot{border-radius:999px;background:none;border:1.5px solid var(--muted);width:7px;height:7px}
+.miss{padding:14px 18px;color:var(--muted);font-size:13.5px}
+
+@media (max-width:960px){
+  .shell{grid-template-columns:1fr}
+  nav{position:static;max-height:none;padding:18px 24px;border-bottom:1px solid var(--line)}
+  nav ol{max-height:320px;overflow-y:auto}
+  main{padding:22px 24px 80px}
+  .mast{padding:32px 24px 22px}
+  .panel.lvl5,.panel.lvl6{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+</head>
+<body>
+
+<div class="shell">
+<header class="mast">
+  <h1>Руководство zhb</h1>
+  <p>Семь пакетов для Blender 5.2 LTS: пути и стопки, толпа, физика, частицы,
+  сцена и рендер, отдача в After Effects. Ниже — порядок действий для каждой
+  задачи и справочник по каждой панели, кнопке и полю. Раздел «Справочник
+  интерфейса» собран из зарегистрированных классов, поэтому он полон
+  по построению: 150 операторов из 150.</p>
+  <div class="chips">
+    <span class="chip">Blender 5.2 LTS</span>
+    <span class="chip anim">zhb Anim · animation 0.6.0 · zondbe 0.22.0 · particle effects 0.5.0</span>
+    <span class="chip studio">zhb Studio · creative studio 0.29.0 · blae 0.7.0</span>
+    <span class="chip physx">zhb PhysX · physx 0.49.0</span>
+    <span class="chip">core 0.4.0</span>
+    <span class="chip">18.09.2026</span>
+  </div>
+</header>
+
+<nav aria-label="Содержание">
+  <input class="search" id="q" type="search" placeholder="искать панель или кнопку" autocomplete="off">
+  <ol id="toc"><li><a class="h2" href="#1-что-устанавливается">1. Что устанавливается</a></li><li><a class="h2" href="#2-установка">2. Установка</a></li><li><a class="h3" href="#обычный-способ-скачать-бандл-и-запустить-установщик">Обычный способ: скачать бандл и запустить установщик</a></li><li><a class="h3" href="#с-нуля-если-нужны-и-исходники">С нуля, если нужны и исходники</a></li><li><a class="h3" href="#когда-исходники-уже-есть">Когда исходники уже есть</a></li><li><a class="h3" href="#вручную-по-одному">Вручную, по одному</a></li><li><a class="h3" href="#проверка-что-всё-встало">Проверка, что всё встало</a></li><li><a class="h2" href="#3-правила-общие-для-всех-аддонов">3. Правила, общие для всех аддонов</a></li><li><a class="h2" href="#4-порядок-работы">4. Порядок работы</a></li><li><a class="h3" href="#41-новый-файл-под-мобильный-креатив">4.1. Новый файл под мобильный креатив</a></li><li><a class="h3" href="#42-персонаж-идёт-по-пути-и-что-то-делает-по-дороге">4.2. Персонаж идёт по пути и что-то делает по дороге</a></li><li><a class="h3" href="#43-стопка-перелёты-и-сортировка-по-корзинам">4.3. Стопка, перелёты и сортировка по корзинам</a></li><li><a class="h3" href="#44-толпа">4.4. Толпа</a></li><li><a class="h3" href="#45-физика">4.5. Физика</a></li><li><a class="h3" href="#46-частицы-по-удару">4.6. Частицы по удару</a></li><li><a class="h3" href="#47-отдача-в-after-effects">4.7. Отдача в After Effects</a></li><li><a class="h3" href="#48-рендер">4.8. Рендер</a></li><li><a class="h3" href="#49-быстрые-серии-анимации">4.9. Быстрые серии анимации</a></li><li><a class="h3" href="#410-составной-объект-и-замена-блокинга">4.10. Составной объект и замена блокинга</a></li><li><a class="h2" href="#5-справочник-интерфейса">5. Справочник интерфейса</a></li><li><a class="panel4" href="#animation-4-365">Animation</a></li><li><a class="panel5" href="#path-animation-5-370">Path Animation</a></li><li><a class="panel6" href="#speed-6-380">Speed</a></li><li><a class="panel6" href="#idle-trigger-run-6-386">Idle / Trigger / Run</a></li><li><a class="panel5" href="#camera-rig-5-396">Camera Rig</a></li><li><a class="panel5" href="#zhb-stax-5-404">Zhb Stax</a></li><li><a class="panel5" href="#camera-beats-5-413">Camera Beats</a></li><li><a class="panel5" href="#animation-recipes-5-423">Animation Recipes</a></li><li><a class="panel4" href="#setup-4-438">Setup</a></li><li><a class="panel5" href="#project-setup-5-443">Project Setup</a></li><li><a class="panel5" href="#crop-guides-5-451">Crop Guides</a></li><li><a class="panel5" href="#render-settings-transfer-5-456">Render Settings Transfer</a></li><li><a class="panel5" href="#autosave-5-462">Autosave</a></li><li><a class="panel5" href="#assembly-blockout-5-470">Assembly &amp; Blockout</a></li><li><a class="panel4" href="#simulation-4-485">Simulation</a></li><li><a class="panel5" href="#bake-5-490">Bake</a></li><li><a class="panel5" href="#world-5-501">World</a></li><li><a class="panel5" href="#convert-5-507">Convert</a></li><li><a class="panel4" href="#optimize-4-514">Optimize</a></li><li><a class="panel5" href="#scene-doctor-5-519">Scene Doctor</a></li><li><a class="panel5" href="#sample-test-5-526">Sample Test</a></li><li><a class="panel5" href="#scene-cleanup-5-533">Scene Cleanup</a></li><li><a class="panel5" href="#texture-proxies-5-545">Texture Proxies</a></li><li><a class="panel4" href="#render-deliver-4-552">Render &amp; Deliver</a></li><li><a class="panel5" href="#production-preflight-5-557">Production Preflight</a></li><li><a class="panel5" href="#render-mode-5-565">Render Mode</a></li><li><a class="panel5" href="#batch-render-5-571">Batch Render</a></li><li><a class="panel5" href="#creative-variants-5-586">Creative Variants</a></li><li><a class="panel5" href="#deliver-5-603">Deliver</a></li><li><a class="panel4" href="#crowd-4-613">Crowd</a></li><li><a class="panel5" href="#roles-5-618">Roles</a></li><li><a class="panel5" href="#goals-5-629">Goals</a></li><li><a class="panel5" href="#solver-5-634">Solver</a></li><li><a class="panel5" href="#battle-5-639">Battle</a></li><li><a class="panel5" href="#characters-5-644">Characters</a></li><li><a class="panel5" href="#bake-5-655">Bake</a></li><li><a class="panel5" href="#cache-5-663">Cache</a></li><li><a class="panel4" href="#particle-effects-4-671">Particle Effects</a></li><li><a class="panel5" href="#setup-5-676">Setup</a></li><li><a class="panel5" href="#effect-5-683">Effect</a></li><li><a class="panel5" href="#trigger-5-690">Trigger</a></li><li><a class="panel5" href="#particles-5-697">Particles</a></li><li><a class="panel5" href="#integrity-5-703">Integrity</a></li><li><a class="panel4" href="#zhb-blae-4-709">Zhb BlAe</a></li><li><a class="panel5" href="#tracking-5-714">Tracking</a></li><li><a class="panel5" href="#action-marks-5-721">Action Marks</a></li><li><a class="panel6" href="#selected-mark-6-731">Selected Mark</a></li><li><a class="panel6" href="#auto-detect-6-736">Auto Detect</a></li><li><a class="panel6" href="#export-marks-6-745">Export Marks</a></li><li><a class="panel5" href="#delivery-package-5-752">Delivery Package</a></li><li><a class="panel4" href="#box3d-bake-4-759">Box3D Bake</a></li><li><a class="panel4" href="#box3d-body-4-770">Box3D Body</a></li><li><a class="panel4" href="#box3d-fracture-4-782">Box3D Fracture</a></li><li><a class="panel4" href="#box3d-joint-4-790">Box3D Joint</a></li><li><a class="panel4" href="#zhb-zondbe-4-798">Zhb Zondbe</a></li><li><a class="panel4" href="#команды-без-панели-f3-python-4-811">Команды без панели (F3 / Python)</a></li><li><a class="h2" href="#6-где-что-лежит-на-диске">6. Где что лежит на диске</a></li><li><a class="h2" href="#7-когда-что-то-идёт-не-так">7. Когда что-то идёт не так</a></li><li><a class="h2" href="#8-чего-аддоны-намеренно-не-делают">8. Чего аддоны намеренно не делают</a></li></ol>
+</nav>
+
+<main id="doc">
+  <div class="legend">
+    <span><i></i> кнопка</span>
+    <span><i class="dot"></i> поле или галочка</span>
+    <span>цвет слева — вкладка, в которой живёт панель</span>
+  </div>
+<p>Единый справочник по семи пакетам: что где лежит, в каком порядке нажимать и</p>
+<p>что должно получиться. Обновлён 18.09.2026 по текущим версиям исходников и</p>
+<p><strong>сверен с кодом</strong>: описания кнопок и полей взяты из самих аддонов,</p>
+<p>а не переписаны руками, поэтому в разделе «Справочник интерфейса» присутствуют</p>
+<p>все 150 операторов и все панели, которые Blender регистрирует.</p>
+<p>Blender — <strong>5.2 LTS</strong>. Это не «не ниже», а «на этом запускают и тестируют».</p>
+<section id="1-что-устанавливается"><h2>1. Что устанавливается</h2>
+<div class="table-wrap"><table><thead><tr><th>Пакет</th><th>Версия</th><th>Вкладка</th><th>Зачем</th></tr></thead><tbody><tr><td><code>zhb_core</code></td><td>0.4.0</td><td>—</td><td>Общая библиотека и контракты обмена. Ставится, <strong>не включается</strong></td></tr><tr><td><code>zhb_animation</code></td><td>0.6.0</td><td><code>zhb Anim</code></td><td>Пути, камера, стопки и Animation Recipes</td></tr><tr><td><code>zhb_zondbe</code></td><td>0.22.0</td><td><code>zhb Anim</code></td><td>Толпа на полях течения и контроль кэша</td></tr><tr><td><code>zhb_particle_effects</code></td><td>0.5.0</td><td><code>zhb Anim</code></td><td>Частицы по удару и проверка procedural rig</td></tr><tr><td><code>zhb_creative_studio</code></td><td>0.29.0</td><td><code>zhb Studio</code></td><td>Preflight, варианты, assemblies, blockout replacement и supervisor рендера</td></tr><tr><td><code>zhb_blae</code></td><td>0.7.0</td><td><code>zhb Studio</code></td><td>Трекинг, события и AE Delivery Package</td></tr><tr><td><code>zhb_physx</code></td><td>0.49.0</td><td><code>zhb PhysX</code></td><td>Физика Box3D и контроль целостности bake</td></tr></tbody></table></div>
+<p>Три вкладки в сайдбаре (<code>N</code> во вьюпорте), а не семь: аддоны, работающие над</p>
+<p>одной задачей, рисуются в одну вкладку. Внутри вкладки порядок разделов</p>
+<p>закреплён и не зависит от того, какие аддоны включены.</p>
+<p><strong>Как устроена любая вкладка.</strong> Верхний уровень — только имена: свёрнутые</p>
+<p>разделы и ничего больше. Кнопки и поля лежат на уровень ниже, в подпанелях.</p>
+<p>Открытой не приходит ни одна панель — вкладка начинается со списка того, что</p>
+<p>в ней есть, а не со стены настроек одного шага. Это проверяется скриптом</p>
+<p>(<code>zhb_core/tools/audit_ui.py</code>), а не поддерживается вручную.</p>
+<p>Исключение одно и оно осознанное: настройки <strong>объекта</strong> живут в редакторе</p>
+<p>свойств рядом с родными настройками Blender — <code>Properties → Physics</code> для</p>
+<p>Box3D Body и ролей толпы. Всё, что относится к сцене целиком, — в сайдбаре.</p>
+<p><strong>Аддоны друг друга не знают.</strong> Ни один не импортирует соседа, ни один не пишет</p>
+<p>в чужие свойства. Выключите любой — остальные работают. Единственная общая</p>
+<p>зависимость — <code>zhb_core</code>, и она нужна всем шести.</p>
+</section>
+<section id="2-установка"><h2>2. Установка</h2>
+<p><strong>Все релизы лежат в одном репозитории — <code>zhb_core</code>.</strong> Одна страница, один тег,</p>
+<p>один архив со всем сразу. Исходники по-прежнему в четырёх репозиториях: переехали</p>
+<p>артефакты, не код.</p>
+<h3 id="обычный-способ-скачать-бандл-и-запустить-установщик">Обычный способ: скачать бандл и запустить установщик</h3>
+<pre><code>gh release download bundle-v2026.09.14 -R JustBelieve9/zhb_core -D zhb-release
+bash zhb-release/install_zips.sh</code></pre>
+<p>Распакует всё в профиль Blender, отметит галочки и проверит, что каждый пакет</p>
+<p>загрузился, — в конце печатает версии и <code>VERIFY OK</code>. Не загрузилось — код</p>
+<p>возврата не ноль, и «Done» не печатается.</p>
+<p>Сам разберётся, какой из трёх архивов <code>zhb_physx</code> ваш (внутри скомпилированный</p>
+<p>солвер), и первой поставит библиотеку.</p>
+<div class="table-wrap"><table><thead><tr><th>Ключ</th><th>Что делает</th></tr></thead><tbody><tr><td><code>--dir DIR</code></td><td>Брать архивы из другой папки</td></tr><tr><td><code>--no-enable</code></td><td>Поставить, но не трогать галочки в настройках</td></tr><tr><td><code>--all-versions</code></td><td>Поставить во все найденные версии Blender</td></tr><tr><td><code>--list</code></td><td>Сказать, что будет поставлено, и ничего не менять</td></tr></tbody></table></div>
+<p>Git и исходники для этого не нужны — нужны только файлы из релиза.</p>
+<h3 id="с-нуля-если-нужны-и-исходники">С нуля, если нужны и исходники</h3>
+<pre><code>gh auth login
+gh release download bundle-v2026.09.14 -R JustBelieve9/zhb_core -p bootstrap.sh
+bash bootstrap.sh --enable</code></pre>
+<p>Склонирует четыре репозитория, разложит семь пакетов в профиль, проставит</p>
+<p>галочки и проверит. Репозитории приватные — авторизованный GitHub обязателен.</p>
+<h3 id="когда-исходники-уже-есть">Когда исходники уже есть</h3>
+<pre><code>bash zhb_core/tools/install_all.sh --enable</code></pre>
+<div class="table-wrap"><table><thead><tr><th>Ключ</th><th>Что делает</th></tr></thead><tbody><tr><td><code>--check</code></td><td>Ничего не ставит, только говорит, разошёлся ли профиль с исходниками</td></tr><tr><td><code>--enable</code></td><td>Сразу проставляет галочки в настройках</td></tr><tr><td><code>--root DIR</code></td><td>Искать пакеты в другой папке</td></tr><tr><td><code>--all-versions</code></td><td>Поставить во все найденные версии Blender</td></tr></tbody></table></div>
+<h3 id="вручную-по-одному">Вручную, по одному</h3>
+<p>Архивы из того же релиза: Edit → Preferences → Add-ons → Install from Disk.</p>
+<p><strong>Сначала <code>zhb_core.zip</code></strong> — без него остальные откажутся включаться и скажут,</p>
+<p>чего не хватает. Саму библиотеку включать не нужно, её импортируют.</p>
+<p>У <code>zhb_physx</code> три архива по платформам (<code>macos-arm64</code>, <code>windows-x86_64</code>,</p>
+<p><code>linux-x86_64</code>) — внутри бинарный солвер, поэтому берите свой.</p>
+<h3 id="проверка-что-всё-встало">Проверка, что всё встало</h3>
+<p>Откройте вьюпорт, нажмите <code>N</code>. Должны быть три вкладки: <strong>zhb Anim</strong>,</p>
+<p><strong>zhb Studio</strong>, <strong>zhb PhysX</strong>. Если вкладки нет — аддон не включён; если аддон</p>
+<p>не включается — смотрите консоль, там будет причина.</p>
+</section>
+<section id="3-правила-общие-для-всех-аддонов"><h2>3. Правила, общие для всех аддонов</h2>
+<p><strong>Долгое считается один раз и ложится в кэш.</strong> Толпа, физика, стопки, биты</p>
+<p>камеры — всё это <em>бейк</em>: нажали кнопку, посчиталось, дальше проигрывается</p>
+<p>дёшево. Ничто из этого не считается заново во время рендера. Поэтому кадры</p>
+<p>рендерятся в любом порядке и повторный рендер совпадает с предыдущим.</p>
+<p><strong>Один и тот же Seed даёт один и тот же результат.</strong> Везде, где есть случайность</p>
+<p>— разброс стопки, характеры в толпе, разлёт частиц — она управляется числом, и</p>
+<p>одинаковое число даёт одинаковую картинку.</p>
+<p><strong>Радиус срабатывания — это видимый размер объекта.</strong> У триггеров пути, зон</p>
+<p>толпы, ворот и битов камеры одно правило: насколько растянута пустышка, такой у</p>
+<p>неё радиус. Не поле в панели, а то, что видно во вьюпорте.</p>
+<p><strong>Отказ лучше догадки.</strong> Там, где правильного ответа нет — у предмета нет</p>
+<p>подходящей корзины, у формы столкновений нет соответствия, два бита камеры</p>
+<p>налезают друг на друга — аддон останавливается и называет проблему, а не</p>
+<p>выбирает молча. Проблемные объекты при этом выделяются во вьюпорте.</p>
+<p><strong>Сохраняйте файл до начала.</strong> Пакетный рендер, сборка проекта, дисковые кэши и</p>
+<p>автосейв кладут результат рядом с <code>.blend</code> и без сохранённого файла не работают.</p>
+</section>
+<section id="4-порядок-работы"><h2>4. Порядок работы</h2>
+<p>Десять сценариев. В каждом — по шагам, и что должно получиться.</p>
+<h3 id="41-новый-файл-под-мобильный-креатив">4.1. Новый файл под мобильный креатив</h3>
+<p>1. <strong>zhb Studio → Setup → Project Setup</strong>. Нажмите **Make This File</p>
+<p>Mobile-Creative Ready**. Ставит разрешение, FPS, цветоуправление и</p>
+<p>композитор под вертикальный креатив.</p>
+<p><em>Результат:</em> файл настроен под мастер-формат, из которого потом режутся 9:16,</p>
+<p>4:5 и 16:9.</p>
+<p>2. <strong>Setup → Crop Guides</strong>. Включите рамки. Во вьюпорте появятся границы</p>
+<p>форматов поверх камеры.</p>
+<p><em>Результат:</em> видно, что не вылезет за кадр ни в одном из форматов.</p>
+<p>3. <strong>Setup → Autosave</strong>. Включите снимки, если работа длинная.</p>
+<p><em>Результат:</em> копии файла рядом с проектом, ротация по возрасту.</p>
+<p>4. <strong>Setup → Project Setup</strong> — там же задайте, какие настройки считать</p>
+<p>«финальными». Ниже, в <strong>Render &amp; Deliver → Render Mode</strong>, переключатель</p>
+<p>Черновик / Финал / Статика будет применять именно их.</p>
+<h3 id="42-персонаж-идёт-по-пути-и-что-то-делает-по-дороге">4.2. Персонаж идёт по пути и что-то делает по дороге</h3>
+<p>1. Нарисуйте кривую. Выделите персонажа, затем <code>Shift</code>+кривую (кривая активная).</p>
+<p>2. <strong>zhb Anim → Animation → Path Animation → Setup Follow Path</strong>.</p>
+<p><em>Результат:</em> у персонажа появляется Follow Path и свойство</p>
+<p><code>followpath_distance</code> — <strong>метры вдоль пути</strong>, не доля 0..1.</p>
+<p>3. Ставьте ключи расстояния кнопкой <strong>Key Distance</strong> на нужных кадрах.</p>
+<p>Остановка — два соседних ключа с одинаковым значением.</p>
+<p>4. <strong>Make Distance Linear</strong> — прибирает ключи остановок, чтобы персонаж не</p>
+<p>дёргался вперёд-назад на месте.</p>
+<p>5. <strong>Path Animation → Speed → Equalize Speed</strong>, если скорость между отрезками</p>
+<p>должна быть одинаковой. Двигает <strong>кадры</strong>, не расстояния: это ретайминг, а не</p>
+<p>переанимация.</p>
+<p>6. <strong>Idle / Trigger / Run</strong>: назначьте действия стойки и бега, укажите</p>
+<p><strong>Run Cycle Distance</strong> — сколько метров персонаж проходит за один цикл бега.</p>
+<p>Нажмите <strong>Apply Idle / Run</strong>.</p>
+<p><em>Результат:</em> NLA собран, бег на отрезках движения, стойка на остановках,</p>
+<p>число циклов бега взято из пройденных метров — <strong>ноги не скользят</strong>.</p>
+<p>7. Триггеры по дороге: <strong>Add Trigger</strong> создаёт сферу; двигайте <code>G</code>, масштаб <code>S</code></p>
+<p>задаёт радиус. Или <strong>Add Timed Trigger</strong> — просто по кадру.</p>
+<p><em>Результат:</em> в NLA появляются действия триггеров там, где персонаж прошёл</p>
+<p>мимо сферы.</p>
+<h3 id="43-стопка-перелёты-и-сортировка-по-корзинам">4.3. Стопка, перелёты и сортировка по корзинам</h3>
+<p>1. <strong>zhb Anim → Animation → Zhb Stax</strong>. Задайте источник: <strong>Объект</strong> или</p>
+<p><strong>Коллекция</strong> (во втором случае каждый элемент — случайный объект из неё,</p>
+<p>выбор управляется Seed).</p>
+<p>2. Размеры сетки: Columns / Depth / Levels, зазоры, масштаб. <strong>Build Stack</strong>.</p>
+<p><em>Результат:</em> стопка linked-дубликатов под контроллером-пустышкой.</p>
+<p>3. Анимация количества: ключи свойства <strong>Количество</strong> на контроллере. Элементы</p>
+<p>появляются и исчезают по этому числу, с отскоком.</p>
+<p>4. Перелёты: задайте <strong>Target</strong> или <strong>Target Collection</strong>, число перелётов и</p>
+<p>длительность. Ключи свойства <strong>Перелёт</strong>.</p>
+<p><em>Результат:</em> элементы по одному улетают к цели по дуге.</p>
+<p>5. <strong>Сортировка по корзинам.</strong> Target Order → <strong>By Kind</strong>. На исходном объекте</p>
+<p>поставьте пользовательское свойство <code>zhb_kind</code> (имя настраивается), такое же</p>
+<p>— на объекте-корзине со значением, которое она принимает.</p>
+<p><em>Результат:</em> каждый предмет летит в свою корзину. Предмет, которому корзины</p>
+<p>нет, <strong>остаётся в стопке</strong> и попадает в отчёт — в чужую его не досыпают.</p>
+<p>6. <strong>Сбор пустышкой.</strong> Automatic Triggers: укажите персонажа и коллекцию</p>
+<p>триггеров, радиус и сколько предметов даёт одно срабатывание. **Build Trigger</p>
+<p>Animation**.</p>
+<p><em>Результат:</em> проводите персонажа по сцене — каждая точка срабатывает один раз,</p>
+<p>стопки копятся.</p>
+<p>7. Галочка <strong>Write Collect Events</strong> пишет прилёты в текстовый блок</p>
+<p><strong>«zhb Collect Events»</strong>: кадр, корзина, предмет, вид, накопленный итог.</p>
+<p><em>Результат:</em> готовый вход для счётчика в After Effects (см. 4.7).</p>
+<h3 id="44-толпа">4.4. Толпа</h3>
+<p>1. <strong>Разметьте сцену.</strong> Вкладка физики объекта или <strong>zhb Anim → Crowd → Roles</strong>:</p>
+<ul class="rows">
+<li class="button"><strong>Ground</strong> — ровный меш, по его габаритам строится сетка. Должен быть ровно один.</li>
+<li class="button"><strong>Obstacle</strong> — непроходимое.</li>
+<li class="button"><strong>Zone</strong> — цель. Радиус равен размеру пустышки; стрелка вместо сферы</li>
+</ul>
+<p>означает направление, а не место.</p>
+<ul class="rows">
+<li class="button"><strong>Spawn</strong> — откуда появляются. Пустышка даёт диск, любой другой объект —</li>
+</ul>
+<p>эмиттер по рёбрам.</p>
+<ul class="rows">
+<li class="button"><strong>Gate</strong> — ворота, меняющие численность (см. ниже).</li>
+</ul>
+<p>2. <strong>Crowd → Bake → Bake Crowd.</strong></p>
+<p><em>Результат:</em> точечное облако <code>ZondbeCrowdPoints</code> с атрибутами (позиция,</p>
+<p>направление, скорость, фаза, состояние, команда, <code>alive</code>). На него вешаются</p>
+<p>геоноды с персонажами.</p>
+<p>3. <strong>Crowd → Cache</strong> — где живёт бейк: внутри <code>.blend</code> или файлом рядом. Там же</p>
+<p><strong>Warm-up Frames</strong>: сколько кадров досчитать <em>до</em> первого кадра сцены, чтобы</p>
+<p>толпа успела прибежать и устояться.</p>
+<p>4. <strong>Ворота.</strong> Объект с ролью Gate, операция ×N / +N / −N.</p>
+<p><em>Результат:</em> толпа, проходя через них, растёт или убывает. Каждое тело</p>
+<p>проходит одни ворота <strong>один раз</strong>.</p>
+<p><em>Важно:</em> всё, что ворота смогут выпустить, выделяется <strong>до</strong> бейка. Потолок —</p>
+<p><strong>Gate Reserve Cap</strong>; упёрлись в него — бейк скажет словами, на экране это</p>
+<p>выглядит просто как переставшая расти толпа.</p>
+<p>5. <strong>Бой.</strong> Панель <strong>Crowd → Battle</strong>: включить, задать радиус контакта, урон и паузу</p>
+<p>между попаданиями. Команда и здоровье — на спавнере.</p>
+<p><em>Результат:</em> агенты разных команд убывают при сближении; павший исчезает</p>
+<p>штатно, как ушедший за кадр. Команда доезжает до точек атрибутом</p>
+<p><code>agent_team</code> — по нему геоноды красят стороны.</p>
+<p><em>Важно:</em> пауза между попаданиями обязательна, иначе двое, идущие рядом,</p>
+<p>убивают друг друга на первом же кадре касания.</p>
+<h3 id="45-физика">4.5. Физика</h3>
+<p>1. Выделите объекты, <strong>zhb PhysX → Simulation → Bake</strong>: <strong>Mark Active</strong> (двигается солвером)</p>
+<p>или <strong>Mark Passive</strong> (стоит; с ключами — толкает активные).</p>
+<p>2. Форма столкновений — в Properties → Physics → <strong>Box3D Body</strong>. Бокс и сфера</p>
+<p>дёшевы; <strong>Mesh только для неподвижного Passive</strong>; для движущегося вогнутого</p>
+<p>тела — <strong>Compound</strong> из детей.</p>
+<p>3. Включите <strong>Show Collision Shapes</strong>, чтобы увидеть во вьюпорте ту форму,</p>
+<p>которой объект реально сталкивается.</p>
+<p><em>Результат:</em> сразу видно, что коллизия не того размера или не там.</p>
+<p>4. <strong>Simulation → World</strong> — гравитация, подшаги, режим вывода:</p>
+<ul class="rows">
+<li class="button"><strong>Keyframes</strong> — обычные ключи, редактируются в Graph Editor;</li>
+<li class="button"><strong>Blend Cache</strong> / <strong>Disk Cache</strong> — сырые кадры, проигрываются обработчиком;</li>
+<li class="button"><strong>Instanced</strong> — для тысяч тел: одно point-instance вместо тысячи объектов.</li>
+</ul>
+<p>5. <strong>Bake</strong>.</p>
+<p><em>Результат:</em> движение записано; сцена дальше просто проигрывает готовое.</p>
+<p>6. Дополнительно: <strong>Fracture</strong> (разрушаемые стены), <strong>Mark Joint</strong> на пустышках</p>
+<p>(шарниры, верёвки), <strong>Mark Trigger</strong> (зона, включающая физику по проходу),</p>
+<p><strong>Mark Tool</strong> (притянуть, унести, ударить импульсом).</p>
+<p>7. <strong>Simulation → Convert</strong> — если файл пришёл собранным под родную физику Blender:</p>
+<p><strong>Bullet To Box3D</strong> переносит active/passive и формы столкновений.</p>
+<p><em>Результат:</em> то, для чего честного соответствия нет (цилиндр, конус,</p>
+<p>меш-форма на движущемся теле), <strong>не трогается</strong>, выделяется и объясняется в</p>
+<p>текстовом блоке «Box3D Convert». Масса и трение не переносятся — ими владеет</p>
+<p>каждый движок сам.</p>
+<h3 id="46-частицы-по-удару">4.6. Частицы по удару</h3>
+<p>1. Выделите объект(ы), <strong>zhb Anim → Particle Effects → Setup → Analyse Selection</strong>.</p>
+<p><em>Результат:</em> аддон замеряет габариты и цвет и предлагает параметры.</p>
+<p>2. <strong>Setup → Apply Setup</strong>, затем в <strong>Effect</strong> выберите эффект: листья, пыль,</p>
+<p>щебень, пыль+щебень.</p>
+<p>3. Панель <strong>Trigger</strong>: вручную (<strong>Fire Now</strong>), по ключу-галочке или по сближению с</p>
+<p>объектом — радиус берётся из размера пустышки.</p>
+<p><em>Результат:</em> вспышка привязана к моменту, а не к кадру, на котором вы</p>
+<p>оказались; сцена без активных эффектов не держит обработчик.</p>
+<h3 id="47-отдача-в-after-effects">4.7. Отдача в After Effects</h3>
+<p>1. <strong>zhb Studio → Zhb BlAe → Tracking.</strong> Выберите объекты и камеру,</p>
+<p>укажите файл, <strong>Export Tracking</strong>.</p>
+<p><em>Результат:</em> JSON с экранными координатами по кадрам + JSX-импортёр, который</p>
+<p>собирает из него слои в AE.</p>
+<p>2. <strong>Zhb BlAe → Action Marks.</strong> Кнопка <strong>Add Mark</strong> заводит метку, поля</p>
+<p>выделенной — в подпанели <strong>Selected Mark</strong>: кадр, категория, шина, объект,</p>
+<p>заметка. Или <strong>Auto Detect</strong> — удары, появления, смена текста, склейки.</p>
+<p>3. Если в сцене работала сортировка из 4.3, включите детектор <strong>Collect</strong>.</p>
+<p><em>Результат:</em> каждый прилёт становится событием категории Counter с полями</p>
+<p><strong>Amount</strong> и <strong>Total</strong> — числом, по которому в AE рисуется счётчик. Считает</p>
+<p>Blender, AE только показывает.</p>
+<p>4. <strong>Export Marks</strong> — JSON со временем в секундах, экранными координатами,</p>
+<p>именами слоёв и FPS.</p>
+<p>5. После готового задания Render Supervisor откройте <strong>Delivery Package</strong>,</p>
+<p>выберите его <code>manifest.json</code> и нажмите <strong>Build Delivery Package</strong>.</p>
+<p><em>Результат:</em> одна переносимая папка или ZIP с полной последовательностью,</p>
+<p><code>delivery.json</code>, tracking/events и AE-импортёром. Неполный рендер не</p>
+<p>упаковывается. В AE импортёр сам создаст композицию, если активной нет.</p>
+<h3 id="48-рендер">4.8. Рендер</h3>
+<p>1. <strong>Render &amp; Deliver → Render Mode</strong>: Черновик / Финал / Статика.</p>
+<p>2. Перед финалом — <strong>Optimize → Sample Test</strong>: рендерит несколько кадров в трёх</p>
+<p>качествах и показывает, сколько стоит каждое.</p>
+<p>3. <strong>Optimize → Scene Doctor</strong> — отчёт по сцене: где на самом деле стоит кадр.</p>
+<p><strong>Scene Cleanup</strong> — слияние дублей мешей, материалов и картинок и чистка</p>
+<p>дорогих шейдеров; <strong>Texture Proxies</strong> — временно уменьшить текстуры;</p>
+<p><strong>Trim Frame Cost</strong> — срезать заведомо дорогие настройки рендера.</p>
+<p><em>Важно:</em> прокси видны в отчёте; не забудьте вернуть оригиналы перед финалом.</p>
+<p>4. <strong>Production Preflight → Run Preflight</strong> проверяет файл, камеру, диапазон,</p>
+<p>output, внешние зависимости и целостность bake/cache. Ошибки блокируют</p>
+<p>подготовку очереди; безопасные исправления применяются отдельно.</p>
+<p>5. <strong>Creative Variants</strong> хранит наборы контролируемых замен: видимость,</p>
+<p>камера, материал/цвет/текстура, текст и числовые или цветовые custom</p>
+<p>properties. <strong>Preview Variant</strong> временно применяет вариант, <strong>Restore Base</strong></p>
+<p>возвращает сцену, а <strong>Add Enabled Set to Queue</strong> создаёт обычные задания.</p>
+<p>6. <strong>Batch Render</strong> — очередь версий. <strong>Capture As Version</strong> запоминает</p>
+<p>состояние, <strong>Prepare Queue</strong> сначала запускает Preflight и сохраняет</p>
+<p>неизменяемый <code>.blend</code> для каждого задания, затем <strong>Render Queue</strong> запускает</p>
+<p>отдельный Blender на каждый кадр.</p>
+<p>7. <strong>Pause After Current Frame</strong> останавливает очередь после текущего кадра;</p>
+<p><strong>Resume Queue</strong> продолжает её, проверяя уже готовые файлы.</p>
+<p><em>Результат:</em> готовые кадры пропускаются, обрубленный падением кадр уезжает в</p>
+<p><code>quarantine/</code> и рендерится заново. Манифест покажет, сколько кадров новых и</p>
+<p>сколько взято готовыми.</p>
+<p>8. <strong>Deliver → Collect Project</strong> — собрать проект с зависимостями в папку.</p>
+<p>Перед этим <strong>Find Broken Paths</strong>.</p>
+<h3 id="49-быстрые-серии-анимации">4.9. Быстрые серии анимации</h3>
+<p>1. <strong>zhb Anim → Animation → Animation Recipes</strong>. Добавьте цели и Action.</p>
+<p>2. Выберите рецепт: Stagger, Copy &amp; Vary, Fit Between Markers, Loop/Ping-Pong</p>
+<p>или Marker Placement. Результат живёт в служебных NLA-треках</p>
+<p><code>ZHB_RECIPE:</code>; исходная Action не меняется.</p>
+<p>3. Для привязки по времени используйте собственные cues рецепта. Они не</p>
+<p>записываются в обычные Timeline Markers и рисуются только после **Show</p>
+<p>Recipe Markers<strong>; </strong>Hide Recipe Markers** полностью убирает overlay.</p>
+<p>4. <strong>Clear Recipe Output</strong> удаляет только созданные рецептом полосы, а **Bake</p>
+<p>Recipe Output** явно превращает результат в обычные ключи/Action.</p>
+<h3 id="410-составной-объект-и-замена-блокинга">4.10. Составной объект и замена блокинга</h3>
+<p>1. Выделите корень составного объекта, включите <strong>Include Children</strong> и нажмите</p>
+<p><strong>Setup → Assembly &amp; Blockout → Create Assembly Proxy</strong>. Части переедут в</p>
+<p>source-коллекцию, а в сцене останется один live Geometry Nodes object.</p>
+<p>2. <strong>Edit Assembly Sources</strong> показывает риг и части для правки; **Finish Source</p>
+<p>Editing<strong> снова оставляет один proxy. Перед PhysX нажмите </strong>Sync Physics</p>
+<p>Mesh**: текущая вычисленная геометрия фиксируется в proxy, но исходники не</p>
+<p>удаляются. <strong>Return to Live Assembly</strong> возвращает живую связь.</p>
+<p>3. Для blocking-кубов выберите режим <strong>Exact</strong> и конкретный Object/Collection</p>
+<p>либо <strong>Random from Collection</strong>, коллекцию кандидатов и Seed. Нажмите</p>
+<p><strong>Assign &amp; Build Selected</strong>.</p>
+<p>4. Случайный выбор стабилен для каждого блока: <strong>Rebuild Selected</strong> даёт тот же</p>
+<p>результат, <strong>Reseed Selected</strong> явно меняет варианты. Блок остаётся wire-</p>
+<p>контроллером трансформации; <strong>Remove Replacements</strong> удаляет только созданные</p>
+<p>ассеты и возвращает исходное отображение блоков.</p>
+</section>
+<section id="5-справочник-интерфейса"><h2>5. Справочник интерфейса</h2>
+<p>Ниже — каждая панель в том порядке, в каком она стоит в Blender, и всё, что она</p>
+<p>рисует: кнопки с их подсказками и поля с их описаниями и значениями по</p>
+<p>умолчанию. Раздел собран из зарегистрированных классов, поэтому он полон по</p>
+<p>построению: <strong>150 операторов из 150</strong>.</p>
+<p>Где у одного имени поля в аддоне несколько разных значений (например,</p>
+<p><code>trigger_radius</code> у пути и у стопки), это сказано прямо, а не выбрано наугад.</p>
+<article class="panel lvl4" data-tab="anim" id="animation-4-365"><header class="panel-head"><h4>Animation</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="path-animation-5-370"><header class="panel-head"><h4>Path Animation</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Setup Follow Path</strong> — Добавить Follow Path каждому выделенному объекту (кроме самой кривой), нацелив на активную кривую, и завести дистанционный драйвер (followpath_distance -- метры вдоль пути, не доля 0..1). Выделите объект(ы), затем Shift+кривую последней -- как обычное Ctrl+P &gt; Follow Path в Blender, кривая становится активной</li>
+<li class="button"><strong>Refresh Path Length</strong> — Пересчитать закешированную длину вручную. Обычно это делает автоматика при каждой правке кривой, но Edit Mode обновляет геометрию только при выходе из режима -- эта кнопка не даёт устаревшему кешу пережить сессию</li>
+<li class="button"><strong>Make Distance Linear</strong> — Поставить LINEAR и хендлы VECTOR только ключам, образующим остановку (два соседних ключа с одним значением) -- без этого Bezier-хендл между двумя РАВНЫМИ значениями может дать выброс, персонаж дёрнется вперёд-назад прямо во время остановки. Движущиеся ключи не трогает: там Bezier можно смело оставлять для плавного разгона и торможения</li>
+<li class="button"><strong>Fix Auto Handles</strong> — Перевести хендлы точек с типом Auto на Vector. Auto пересчитывается от соседей -- добавление точки на пару сегментов дальше может на сантиметры сдвинуть уже заанимированный отрезок пути, а Vector реагирует только на своего непосредственного соседа. Форма кривой в этих точках при переводе слегка меняется (одноразово) -- лучше делать это ДО тонкой расстановки остановок, а не после</li>
+<li class="button"><strong>Key Distance</strong> — —</li>
+</ul>
+</div></article>
+<article class="panel lvl6" data-tab="anim" id="speed-6-380"><header class="panel-head"><h4>Speed</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Equalize Speed</strong> — Сделать скорость персонажа одинаковой на всех отрезках движения, подвигав КАДРЫ ключей расстояния. Сами расстояния (то, что нарисовал артист) не трогаются, поэтому это ретайминг, а не переанимация</li>
+</ul>
+</div></article>
+<article class="panel lvl6" data-tab="anim" id="idle-trigger-run-6-386"><header class="panel-head"><h4>Idle / Trigger / Run</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Add Trigger</strong> — Создать сферу-триггер в коллекции триггеров (заведёт её, если ещё нет) и выделить -- дальше двигать G и масштабировать S прямо во вьюпорте: радиус срабатывания РАВЕН видимому размеру сферы. Ставится в позицию 3D-курсора только как стартовая точка, попадать курсором никуда не нужно</li>
+<li class="button"><strong>Add Timed Trigger</strong> — Добавить триггер по кадру без пустышки и коллекции</li>
+<li class="button"><strong>Remove Timed Trigger</strong> — Удалить этот временной триггер</li>
+<li class="button"><strong>Apply Idle / Run</strong> — Разложить стойку, бег и триггеры по NLA, читая уже расставленные артистом ключи расстояния: бег на отрезках движения, стойка на остановках, триггеры в маркерах. Число циклов бега берётся из пройденных метров, а не из кадров, поэтому ноги не скользят. Порядок треков Idle &lt; Trigger &lt; Run, то есть начавшийся бег перебивает недоигранный триггер</li>
+<li class="button"><strong>Clear Idle / Run / Trigger Tracks</strong> — Убрать дорожки Studio Idle/Trigger/Run, не трогая ничего, что сделал сам артист. Если у объекта заполнено поле Animate -- чистит его, а не сам объект</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="camera-rig-5-396"><header class="panel-head"><h4>Camera Rig</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Build Camera Rig</strong> — Собрать риг: пустышка в координатах ГГ, привязанная к нему двумя Child Of (отдельно X, отдельно Y), камера -- обычный ребёнок пустышки. Камера остаётся свободной для анимации и никуда не съезжает в момент нажатия</li>
+<li class="button"><strong>Select Rig Empty</strong> — Выделить пустышку рига -- её двигают, чтобы сместить камеру целиком</li>
+<li class="button"><strong>Retarget To New Character</strong> — Апгрейд: перевести слежение на другой объект. Старая пара Child Of гасится с 1 в 0, новая поднимается с 0 в 1 за несколько кадров начиная с текущего; камера при этом не дёргается ни в начале, ни в конце</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="zhb-stax-5-404"><header class="panel-head"><h4>Zhb Stax</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Rebake Animation</strong> — Создать фиксированные по времени анимации из F-Curve параметра Количество</li>
+<li class="button"><strong>Build Trigger Animation</strong> — Просканировать движение персонажа и создать ключи перелёта</li>
+<li class="button"><strong>Rebuild Stack</strong> — Удалить элементы стопки и создать их заново с сохранёнными настройками</li>
+<li class="button"><strong>Build Stack</strong> — Создать linked-дубликаты и контроллер количества</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="camera-beats-5-413"><header class="panel-head"><h4>Camera Beats</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class=""><em>список</em> — строки с галочкой включения</li>
+<li class="button"><strong>Add Beat</strong> — Добавить бит камеры</li>
+<li class="button"><strong>Remove Beat</strong> — Убрать выделенный бит</li>
+<li class="button"><strong>Bake Beats</strong> — Записать биты обычными ключами на камеру. После этого сцена — просто камера с анимацией: ни обработчиков, ни зависимости от этого аддона</li>
+<li class="button"><strong>Clear Baked Beats</strong> — Убрать с камеры только ключи, записанные битами. Собственная анимация камеры не трогается</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="animation-recipes-5-423"><header class="panel-head"><h4>Animation Recipes</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Show Recipe Markers</strong> — Show or hide private ZHB cues in Timeline editors</li>
+<li class=""><em>список</em> — строки с галочкой включения</li>
+<li class="button"><strong>Add Recipe Marker</strong> — —</li>
+<li class="button"><strong>Remove Recipe Marker</strong> — —</li>
+<li class=""><em>список</em> — строки с галочкой включения</li>
+<li class="button"><strong>Add Recipe</strong> — —</li>
+<li class="button"><strong>Remove Recipe</strong> — —</li>
+<li class="button"><strong>Apply Recipe</strong> — Build removable ZHB_RECIPE NLA tracks on selected objects</li>
+<li class="button"><strong>Clear Recipe</strong> — Remove only tracks owned by the selected recipe</li>
+<li class="button"><strong>Bake Recipe to Keys</strong> — Bake evaluated recipe NLA to ordinary keys on selected objects, then remove the recipe tracks</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="studio" id="setup-4-438"><header class="panel-head"><h4>Setup</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="project-setup-5-443"><header class="panel-head"><h4>Project Setup</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Accept Current Settings As Final</strong> — Запомнить текущие настройки рендера (движок, сэмплы, отскоки, деноизер) как финальные. После этого &#x27;Финал&#x27; и &#x27;Статика&#x27; применяют именно их, а не пресетные -- если вы перешли на Cycles, черновик его уже не сбросит обратно на EEVEE. &#x27;Статика&#x27; поверх добавляет только ресайз-сетку. &#x27;Make This File Mobile-Creative Ready&#x27; не трогается</li>
+<li class="button"><strong>Back To Preset Final</strong> — Забыть захваченные финальные настройки и вернуться к пресетным (EEVEE в замеренном качестве)</li>
+<li class="button"><strong>Make This File Mobile-Creative Ready</strong> — Применить снятые с рабочего проекта настройки: рендер, вывод (RGBA, метаданные выключены), цветоуправление, safe areas, AO-пасс на view layer, мир, композитор и оверлеи вьюпорта. Путь вывода НЕ копируется</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="crop-guides-5-451"><header class="panel-head"><h4>Crop Guides</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="render-settings-transfer-5-456"><header class="panel-head"><h4>Render Settings Transfer</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Copy Render Settings</strong> — Скопировать настройки Render активной сцены из выбранного .blend. Путь вывода, объекты, мир и композитор не копируются</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="autosave-5-462"><header class="panel-head"><h4>Autosave</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Save Autosave Snapshot Now</strong> — Записать снимок немедленно, не дожидаясь простоя</li>
+<li class="button"><strong>Open Snapshot Folder</strong> — Открыть папку со снимками в файловом менеджере</li>
+<li class="button"><strong>Trim Old Snapshots</strong> — Оставить по Keep Versions последних снимков КАЖДОГО проекта в папке, остальные удалить. Обычная ротация трогает только открытый файл, поэтому снимки закрытых проектов копятся в той же папке и не тримятся никогда</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="assembly-blockout-5-470"><header class="panel-head"><h4>Assembly &amp; Blockout</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Create Assembly Proxy</strong> — Move the selected hierarchy into an editable source collection and expose it as one live Geometry Nodes object</li>
+<li class="button"><strong>Finish Source Editing</strong> — Hide the source collection and return to the single proxy object</li>
+<li class="button"><strong>Edit Assembly Sources</strong> — Show and select the editable source objects; hide the proxy temporarily</li>
+<li class="button"><strong>Sync Physics Mesh</strong> — Freeze the current evaluated assembly into the proxy mesh; sources remain editable and can be synced again</li>
+<li class="button"><strong>Return to Live Assembly</strong> — Enable the live Geometry Nodes view again after physics-mesh sync</li>
+<li class="button"><strong>Dissolve Assembly</strong> — Remove the proxy and restore source objects to their original collections</li>
+<li class="button"><strong>Assign &amp; Build Selected</strong> — Store the current Exact or Random rule on every selected block and build its asset</li>
+<li class="button"><strong>Rebuild Selected</strong> — Rebuild selected blocks from their saved rules without changing deterministic random choices</li>
+<li class="button"><strong>Reseed Selected</strong> — Explicitly choose new deterministic variants for selected Random blocks</li>
+<li class="button"><strong>Remove Replacements</strong> — Delete only generated assets and restore the original block display</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="studio" id="simulation-4-485"><header class="panel-head"><h4>Simulation</h4><p class="where">View_3D →  · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="bake-5-490"><header class="panel-head"><h4>Bake</h4><p class="where">View_3D →  · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Bake Box3D Simulation</strong> — Симулировать помеченные объекты через Box3D и записать результат в выбранный вывод</li>
+<li class="button"><strong>Clear Cache</strong> — Удалить только результат бейка: ключи анимации, кеши и облака точек. Осколки, их скрытые источники и пометки тел остаются на месте -- это кнопка для &quot;перебейкать с другой прочностью&quot;. Полный сброс -- Clear zhb physx</li>
+<li class="button"><strong>Clear zhb physx</strong> — Удалить забейканный вывод у помеченных активных объектов и вернуть сцену: осколки удаляются, их источники возвращаются, тела с родным rigid_body отдаются обратно Bullet. Только результат бейка снимает Clear Cache</li>
+<li class="button"><strong>Verify Bake</strong> — Пересчитать сигнатуру входов и проверить полноту результата Box3D. Тяжёлая проверка запускается только этой кнопкой и из Preflight</li>
+<li class="button"><strong>Cache To Keyframes</strong> — Превратить уже забейканный кеш в обычные ключевые кадры, не пересчитывая симуляцию: Blend Cache и Disk Cache пишутся в f-кривые объектов, Instanced -- в f-кривые оригиналов, которые возвращаются из парковки, а облако точек и библиотека форм удаляются. Результат неотличим от бейка сразу в Keyframes, включая то, что потом вернёт Clear Cache</li>
+<li class="button"><strong>Instances To Objects</strong> — Материализовать инстансы текущего кадра: по реальному объекту на каждый живой инстанс, с его мировой трансформацией и мешем из библиотеки форм (связанные дубликаты, не копии). Анимации в этих объектах нет намеренно -- облако точек хранит позы по кадрам без привязки к объектам, за анимированные объекты отвечает Cache To Keyframes. Аддон их дальше не отслеживает, Clear их не удаляет</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="world-5-501"><header class="panel-head"><h4>World</h4><p class="where">View_3D →  · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Toggle Originals In View Layer</strong> — Убрать исходные объекты из view layer (или вернуть обратно). После Instanced-бейка результат несёт облако точек, а исходники нужны только как источник формы и параметров -- но каждый из них всё равно стоит вычисления depsgraph на каждом кадре. Измерено: 7.66 -&gt; 0.47 мс/кадр на 3000 тел. Полностью обратимо: объекты возвращаются ровно в те коллекции, из которых были взяты</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="convert-5-507"><header class="panel-head"><h4>Convert</h4><p class="where">View_3D →  · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Bullet To Box3D</strong> — Перевести объекты с нативной физики Blender на Box3D: Active и Passive тела и их формы столкновений. Переносится только выбор художника -- какие объекты тела, какого типа и какой формы. Масса, трение и упругость НЕ переносятся: ими владеет Box3D, и его значения согласованы между собой. Объекты, для которых честного соответствия нет (цилиндр, конус, меш-форма на движущемся теле), не трогаются, выделяются и перечисляются в тексте «Box3D Convert». Работает по текущему слою видимости</li>
+<li class="button"><strong>Box3D To Bullet</strong> — Перевести помеченные для Box3D объекты обратно на нативную физику Blender: Active и Passive тела и их формы столкновений. Эмиттеры, триггеры, инструменты и соединения Box3D аналога у Bullet не имеют -- они не трогаются, выделяются и перечисляются в тексте «Box3D Convert». Работает по текущему слою видимости</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="studio" id="optimize-4-514"><header class="panel-head"><h4>Optimize</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="scene-doctor-5-519"><header class="panel-head"><h4>Scene Doctor</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Analyse Scene</strong> — Посчитать, из чего складывается стоимость сцены: объекты в view layer, общие меш-датаблоки, дубли изображений и материалов, разрешения текстур, кто использует displacement и bump. Только читает и пишет отчёт -- файл не меняется; чистка сирот живёт отдельной кнопкой Purge Unused</li>
+<li class="button"><strong>Purge Unused</strong> — Штатно почистить сцену: удалить датаблоки, на которые никто не ссылается. Текстовые блоки не трогаются никогда -- там скрипты и заметки. Меняет рабочий файл, Ctrl+Z отменяет. Analyse Scene этого не делает намеренно -- он только считает, и в отчёте может быть то, что удалит эта кнопка</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="sample-test-5-526"><header class="panel-head"><h4>Sample Test</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Run Sample Test</strong> — Отрендерить текущий кадр трижды -- на High/Mid/Low семплах -- и замерить время каждого. Один прогревочный рендер на самом маленьком счётчике перед замером не считается: первый рендер сессии компилирует шейдеры. Все настройки рендера возвращаются как были</li>
+<li class="button"><strong>Show</strong> — Открыть эту картинку в Image Editor</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="scene-cleanup-5-533"><header class="panel-head"><h4>Scene Cleanup</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Analyse Scene</strong> — Посчитать, из чего складывается стоимость сцены: объекты в view layer, общие меш-датаблоки, дубли изображений и материалов, разрешения текстур, кто использует displacement и bump. Только читает и пишет отчёт -- файл не меняется; чистка сирот живёт отдельной кнопкой Purge Unused</li>
+<li class="button"><strong>Purge Unused</strong> — Штатно почистить сцену: удалить датаблоки, на которые никто не ссылается. Текстовые блоки не трогаются никогда -- там скрипты и заметки. Меняет рабочий файл, Ctrl+Z отменяет. Analyse Scene этого не делает намеренно -- он только считает, и в отчёте может быть то, что удалит эта кнопка</li>
+<li class="button"><strong>Merge Duplicate Images</strong> — Склеить датаблоки изображений, указывающие на один и тот же файл. Изображения с разным цветовым пространством или alpha mode НЕ трогаются -- один файл может законно читаться и как sRGB, и как Non-Color</li>
+<li class="button"><strong>Merge Duplicate Materials</strong> — Склеить материалы с идентичным деревом нод И идентичными настройками. Анимированные материалы, ассеты и связанные данные не трогаются. Запускать ПОСЛЕ склейки изображений: пока одинаковые материалы ссылаются на разные датаблоки одной картинки, их отпечатки не совпадут</li>
+<li class="button"><strong>Merge Duplicate Meshes</strong> — Свести объекты с идентичной геометрией на один меш-датаблок. Сравнивается всё: топология, UV, атрибуты, слоты материалов, shape keys -- не только координаты вершин. Объекты остаются на местах; меняется только то, на какие данные они ссылаются. Побочный эффект важнее прямого: появляется право на инстансинг</li>
+<li class="button"><strong>Strip Expensive Shader Nodes</strong> — Убрать настоящий displacement и узлы Bump. Normal Map НЕ трогается -- он стоит копейки, а без него картинка становится плоской без выигрыша. Если в Bump заходил Normal Map, он переподключается напрямую</li>
+<li class="button"><strong>Principled -&gt; Diffuse</strong> — Заменить Principled BSDF на Diffuse BSDF: тот же Base Color (текстура или сплошной цвет) на входе Color, Roughness = 1.0, в Normal ничего не подключается, даже если оно было у Principled. Узлы внутри общих групп не трогаются, только считаются</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="texture-proxies-5-545"><header class="panel-head"><h4>Texture Proxies</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Build Proxies</strong> — Сделать облегчённые копии текстур в папке textures_proxy рядом с проектом. Оригиналы не изменяются и не переносятся. Разрешение ограничивается потолком -- именно это, а не перекодирование, снижает память на рендере. Data-карты и всё с альфой проходят через кодек без потерь</li>
+<li class="button"><strong>Toggle Proxies</strong> — Переключить сцену между прокси и оригиналами. Файлы на диске не трогаются, меняется только то, на что указывают датаблоки</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="studio" id="render-deliver-4-552"><header class="panel-head"><h4>Render &amp; Deliver</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="production-preflight-5-557"><header class="panel-head"><h4>Production Preflight</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Run Preflight</strong> — Read the complete render-readiness report without changing the scene</li>
+<li class="button"><strong>Apply Safe Fixes</strong> — Apply only the explicitly whitelisted fixes shown in the report</li>
+<li class="button"><strong>Copy Preflight JSON</strong> — —</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="render-mode-5-565"><header class="panel-head"><h4>Render Mode</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Apply Render Mode</strong> — Перевести сцену в выбранный режим рендера</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="batch-render-5-571"><header class="panel-head"><h4>Batch Render</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class=""><em>список</em> — строки с галочкой включения</li>
+<li class="button"><strong>Capture As Version</strong> — Добавить в очередь версию из текущего состояния файла: видимость коллекций, hide_render объектов, камера, диапазон кадров и настройки рендера. ВНИМАНИЕ: содержимое не запоминается -- другой цвет материала, сдвинутый объект или другое значение модификатора в версию не попадут. Для таких версий сохраняйте вариант отдельным .blend и добавляйте его файлом</li>
+<li class="button"><strong>Add .blend</strong> — Добавить в очередь чужой .blend. Он рендерится отдельным процессом Blender со своими камерой, кадрами и настройками -- аддон в нём ничего не меняет</li>
+<li class="button"><strong>Remove Job</strong> — Убрать выделенное задание из очереди</li>
+<li class="button"><strong>Move Job</strong> — Сдвинуть выделенное задание по очереди</li>
+<li class="button"><strong>Prepare Queue</strong> — Run Preflight and freeze every snapshot as an immutable .blend before rendering</li>
+<li class="button"><strong>Pause After Current Frame</strong> — Дождаться конца текущего кадра и остановить worker</li>
+<li class="button"><strong>Resume Queue</strong> — Продолжить, проверив и сохранив уже готовые кадры</li>
+<li class="button"><strong>Render Queue</strong> — Отрендерить подготовленные задания отдельными процессами Blender, проверяя каждый кадр перед атомарной публикацией. Упавшее задание останавливает очередь</li>
+<li class="button"><strong>Restore Scene State</strong> — Вернуть видимость, камеру, кадры и настройки рендера к тому, что было до запуска очереди. Появляется, только когда такая запись в сцене есть</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="creative-variants-5-586"><header class="panel-head"><h4>Creative Variants</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class=""><em>список</em> — строки с галочкой включения</li>
+<li class="button"><strong>Add Variant Set</strong> — —</li>
+<li class="button"><strong>Remove Variant Set</strong> — —</li>
+<li class=""><em>список</em> — строки с галочкой включения</li>
+<li class="button"><strong>Add Variant</strong> — —</li>
+<li class="button"><strong>Remove Variant</strong> — —</li>
+<li class=""><em>список</em> — строки с галочкой включения</li>
+<li class="button"><strong>Add Override</strong> — —</li>
+<li class="button"><strong>Remove Override</strong> — —</li>
+<li class="button"><strong>Preview Variant</strong> — —</li>
+<li class="button"><strong>Restore Base</strong> — —</li>
+<li class="button"><strong>Add Variant to Queue</strong> — —</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="deliver-5-603"><header class="panel-head"><h4>Deliver</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Restore Original Textures</strong> — Вернуть картинки, переключённые на прокси, к их оригинальным путям. Для них путь известен точно -- он лежит в свойстве датаблока и переживает сохранение, так что искать ничего не нужно</li>
+<li class="button"><strong>Relink From Folder</strong> — Искать пропавшие файлы в указанной папке рекурсивно и переподключить найденное. Отчёт скажет, что починилось, а что нет</li>
+<li class="button"><strong>Find Missing Files</strong> — Найти всё, на что сцена ссылается, но чего нет на диске, и сказать, где это искать. Группирует по датаблоку: пропавший UDIM-набор это одна проблема, а не сорок</li>
+<li class="button"><strong>Find Broken Paths</strong> — Найти файлы, на которые сцена ссылается, но которых нет на диске. Это надо делать ДО коллекта: иначе после сборки непонятно, что потерялось из-за неё, а что было сломано и раньше</li>
+<li class="button"><strong>Collect Project</strong> — Собрать проект в отдельную папку: распаковать текстуры, скопировать алембики и прочие внешние файлы, переписать пути, вычистить неиспользуемое, сбросить путь вывода. Рабочий файл не изменяется</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="anim" id="crowd-4-613"><header class="panel-head"><h4>Crowd</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="roles-5-618"><header class="panel-head"><h4>Roles</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Mark Ground</strong> — Сделать выделенное землёй: по её габаритам строится сетка</li>
+<li class="button"><strong>Mark Obstacle</strong> — Сделать выделенное препятствием</li>
+<li class="button"><strong>Mark Zone</strong> — Сделать выделенное зоной-целью</li>
+<li class="button"><strong>Mark Spawn</strong> — Сделать выделенное спавнером</li>
+<li class="button"><strong>Mark Gate</strong> — Сделать выделенное воротами: прошедшая толпа меняет численность</li>
+<li class="button"><strong>Unmark</strong> — Убрать роль: симуляция перестанет видеть эти объекты</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="goals-5-629"><header class="panel-head"><h4>Goals</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="solver-5-634"><header class="panel-head"><h4>Solver</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="battle-5-639"><header class="panel-head"><h4>Battle</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="characters-5-644"><header class="panel-head"><h4>Characters</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class=""><em>список</em> — строки с галочкой включения</li>
+<li class="button"><strong>Add Character</strong> — Добавить пару коллекций одного персонажа</li>
+<li class="button"><strong>Remove Character</strong> — Удалить выбранную пару Idle / Run</li>
+<li class="button"><strong>Find Idle / Run Pairs</strong> — Найти коллекции с одинаковым именем и суффиксами Idle / Run</li>
+<li class="button"><strong>Build Characters</strong> — Создать управляемый инстансинг пар Idle / Run</li>
+<li class="button"><strong>Remove Character Instancing</strong> — Убрать с точек созданный аддоном инстансинг</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="bake-5-655"><header class="panel-head"><h4>Bake</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Bake Crowd</strong> — Просимулировать диапазон кадров сцены и записать каждый кадр</li>
+<li class="button"><strong>Clear Bake</strong> — Сбросить запечённое и снять обработчик кадра</li>
+<li class="button"><strong>Show Field</strong> — Построить меш из отрезков — поле направлений к выбранной зоне</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="cache-5-663"><header class="panel-head"><h4>Cache</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Load Cache</strong> — Прочитать запечённое из файла или с диска</li>
+<li class="button"><strong>Clear Cache</strong> — Убрать запечённое: и из файла, и с диска</li>
+<li class="button"><strong>Verify Bake</strong> — Проверить, соответствует ли кэш текущей сцене и покрывает ли он весь диапазон</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="anim" id="particle-effects-4-671"><header class="panel-head"><h4>Particle Effects</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="setup-5-676"><header class="panel-head"><h4>Setup</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Analyse</strong> — Измерить выделенный меш или коллекцию и показать цифры, по которым считаются значения</li>
+<li class="button"><strong>Prepare</strong> — Измерить выделение и поставить на каждый меш одну систему частиц. Повторный вызов обновляет уже готовые объекты, не добавляя вторую систему</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="effect-5-683"><header class="panel-head"><h4>Effect</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Values From Analysis</strong> — Пересчитать частицы, размер и скорости по последнему измерению для выбранного эффекта</li>
+<li class="button"><strong>Remove Effect</strong> — Снять систему частиц, оставив объект как был</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="trigger-5-690"><header class="panel-head"><h4>Trigger</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Key On This Frame</strong> — Поставить галочку на текущем кадре и ключ «выключено» за кадр до него: получается один удар именно здесь</li>
+<li class="button"><strong>Fire Now</strong> — Запустить систему на текущем кадре</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="particles-5-697"><header class="panel-head"><h4>Particles</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Apply To Selected</strong> — Раздать настройки активного объекта остальным выделенным</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="anim" id="integrity-5-703"><header class="panel-head"><h4>Integrity</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Verify Rig</strong> — Проверить исходные меши, настройки, модификаторы и процедурное дерево. Запекание этому эффекту не требуется</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="studio" id="zhb-blae-4-709"><header class="panel-head"><h4>Zhb BlAe</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="tracking-5-714"><header class="panel-head"><h4>Tracking</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Use Scene Range</strong> — Скопировать начальный и конечный кадры сцены</li>
+<li class="button"><strong>Export for After Effects</strong> — Записать экранные координаты объектов в JSON</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="action-marks-5-721"><header class="panel-head"><h4>Action Marks</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Add Mark</strong> — Поставить метку на текущем кадре от активного объекта</li>
+<li class=""><em>список</em> — строки с галочкой включения</li>
+<li class="button"><strong>Remove Mark</strong> — Удалить активное событие</li>
+<li class="button"><strong>Jump to Frame</strong> — Перевести таймлайн на кадр активного события</li>
+<li class="button"><strong>Set Current Frame</strong> — Перенести активное событие на текущий кадр</li>
+</ul>
+</div></article>
+<article class="panel lvl6" data-tab="studio" id="selected-mark-6-731"><header class="panel-head"><h4>Selected Mark</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+</div></article>
+<article class="panel lvl6" data-tab="studio" id="auto-detect-6-736"><header class="panel-head"><h4>Auto Detect</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Use Scene Range</strong> — Скопировать начальный и конечный кадры сцены</li>
+<li class="button"><strong>Detect Events</strong> — Пройти по кадрам и предложить кандидатов в события</li>
+<li class="button"><strong>Confirm Auto Events</strong> — Считать найденные события ручными, чтобы следующий проход их не стёр</li>
+<li class="button"><strong>Drop Auto Events</strong> — Удалить все события, найденные автоматически; ручные остаются</li>
+</ul>
+</div></article>
+<article class="panel lvl6" data-tab="studio" id="export-marks-6-745"><header class="panel-head"><h4>Export Marks</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Export Events</strong> — Записать события с экранными координатами в JSON</li>
+<li class="button"><strong>Refresh Markers</strong> — Перерисовать timeline-маркеры по текущему списку событий</li>
+</ul>
+</div></article>
+<article class="panel lvl5" data-tab="studio" id="delivery-package-5-752"><header class="panel-head"><h4>Delivery Package</h4><p class="where">zhb Studio · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Use This File&#x27;s Last Render</strong> — Подставить manifest Render Supervisor рядом с текущим .blend</li>
+<li class="button"><strong>Build Delivery Package</strong> — Собрать уже готовый рендер, tracking, action marks, AE-скрипт и manifest в одну папку без повторного рендера</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="studio" id="box3d-bake-4-759"><header class="panel-head"><h4>Box3D Bake</h4><p class="where">Properties → physics · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Bake Box3D Simulation</strong> — Симулировать помеченные объекты через Box3D и записать результат в выбранный вывод</li>
+<li class="button"><strong>Clear Cache</strong> — Удалить только результат бейка: ключи анимации, кеши и облака точек. Осколки, их скрытые источники и пометки тел остаются на месте -- это кнопка для &quot;перебейкать с другой прочностью&quot;. Полный сброс -- Clear zhb physx</li>
+<li class="button"><strong>Clear zhb physx</strong> — Удалить забейканный вывод у помеченных активных объектов и вернуть сцену: осколки удаляются, их источники возвращаются, тела с родным rigid_body отдаются обратно Bullet. Только результат бейка снимает Clear Cache</li>
+<li class="button"><strong>Verify Bake</strong> — Пересчитать сигнатуру входов и проверить полноту результата Box3D. Тяжёлая проверка запускается только этой кнопкой и из Preflight</li>
+<li class="button"><strong>Cache To Keyframes</strong> — Превратить уже забейканный кеш в обычные ключевые кадры, не пересчитывая симуляцию: Blend Cache и Disk Cache пишутся в f-кривые объектов, Instanced -- в f-кривые оригиналов, которые возвращаются из парковки, а облако точек и библиотека форм удаляются. Результат неотличим от бейка сразу в Keyframes, включая то, что потом вернёт Clear Cache</li>
+<li class="button"><strong>Instances To Objects</strong> — Материализовать инстансы текущего кадра: по реальному объекту на каждый живой инстанс, с его мировой трансформацией и мешем из библиотеки форм (связанные дубликаты, не копии). Анимации в этих объектах нет намеренно -- облако точек хранит позы по кадрам без привязки к объектам, за анимированные объекты отвечает Cache To Keyframes. Аддон их дальше не отслеживает, Clear их не удаляет</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="studio" id="box3d-body-4-770"><header class="panel-head"><h4>Box3D Body</h4><p class="where">Properties → physics · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Estimate Mass from Size</strong> — Пересчитать массу выделенных тел по их габаритам и форме столкновений (для эмиттеров -- по размеру частицы). Перезаписывает и вручную заданные значения: масса сама по себе никогда не пересчитывается, это единственный способ вернуть её к оценке по размеру</li>
+<li class="button"><strong>Remove From Simulation</strong> — Прекратить симулировать выбранные объекты через Box3D</li>
+<li class="button"><strong>Mark Active</strong> — Пометить выбранные объекты как динамические тела Box3D</li>
+<li class="button"><strong>Mark Passive</strong> — Пометить выбранные объекты как статические тела Box3D</li>
+<li class="button"><strong>Mark Emitter</strong> — Пометить выбранные объекты как источники частиц Box3D</li>
+<li class="button"><strong>Mark Trigger</strong> — Пометить выбранные объекты как зоны-триггеры Box3D</li>
+<li class="button"><strong>Mark Tool</strong> — Пометить выбранные объекты как инструменты Box3D (притяжение, перенос, импульс)</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="studio" id="box3d-fracture-4-782"><header class="panel-head"><h4>Box3D Fracture</h4><p class="where">Properties → physics · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Select Source</strong> — Сделать активным исходный объект, из которого нарезаны эти осколки</li>
+<li class="button"><strong>Clear Fragments</strong> — Удалить осколки этого объекта и вернуть оригинал</li>
+<li class="button"><strong>Generate Fragments</strong> — Разбить выбранный меш на выпуклые осколки Вороного и записать граф связей между ними. Оригинал прячется, но остаётся в файле</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="studio" id="box3d-joint-4-790"><header class="panel-head"><h4>Box3D Joint</h4><p class="where">Properties → physics · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>From Objects</strong> — Поставить Length равным текущему расстоянию между Object A и Object B. Верёвка с неверной длиной дёргает сцену на первом же кадре</li>
+<li class="button"><strong>Remove Joint</strong> — Убрать соединение Box3D с выбранных Empty</li>
+<li class="button"><strong>Mark Joint</strong> — Сделать выбранные Empty соединениями Box3D. Empty задаёт точку и оси соединения: шарнир вращается вокруг его локальной Z</li>
+</ul>
+</div></article>
+<article class="panel lvl4" data-tab="anim" id="zhb-zondbe-4-798"><header class="panel-head"><h4>Zhb Zondbe</h4><p class="where">zhb Anim · свёрнута по умолчанию</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Mark Ground</strong> — Сделать выделенное землёй: по её габаритам строится сетка</li>
+<li class="button"><strong>Mark Obstacle</strong> — Сделать выделенное препятствием</li>
+<li class="button"><strong>Mark Zone</strong> — Сделать выделенное зоной-целью</li>
+<li class="button"><strong>Mark Spawn</strong> — Сделать выделенное спавнером</li>
+<li class="button"><strong>Mark Gate</strong> — Сделать выделенное воротами: прошедшая толпа меняет численность</li>
+<li class="button"><strong>Unmark</strong> — Убрать роль: симуляция перестанет видеть эти объекты</li>
+<li class="button"><strong>Copy To Selected</strong> — Скопировать настройки активного объекта на остальные выделенные с той</li>
+</ul>
+<p>же ролью</p>
+</div></article>
+<article class="panel lvl4" data-tab="anim" id="команды-без-панели-f3-python-4-811"><header class="panel-head"><h4>Команды без панели (F3 / Python)</h4><p class="where">поиск операторов F3 или автоматизация через Python</p></header><div class="panel-body">
+<ul class="rows">
+<li class="button"><strong>Find Objects Never In Frame</strong> — Пройти диапазон и найти объекты, чей bbox ни на одном кадре не пересекает кадр. Только список: объект вне кадра может светить в кадр или отбрасывать в него тень. Ничего не скрывается (<code>zhb_studio.scan_offscreen</code>)</li>
+<li class="button"><strong>Restore Render Settings</strong> — Вернуть значения, которые были до применения сокращений (<code>zhb_studio.restore_render_settings</code>)</li>
+<li class="button"><strong>Trim Frame Cost</strong> — Применить замеренные сокращения времени кадра: тени 0.9 и 16 сэмплов. Каждое изменение записывается для отката. Настройки, которые оказались в пределах шума (трассировка, композитор, fast GI), здесь не предлагаются (<code>zhb_studio.trim_frame_cost</code>)</li>
+</ul>
+</div></article>
+</section>
+<section id="6-где-что-лежит-на-диске"><h2>6. Где что лежит на диске</h2>
+<div class="table-wrap"><table><thead><tr><th>Что</th><th>Где</th><th>Кто пишет</th></tr></thead><tbody><tr><td>Кэш толпы</td><td>внутри <code>.blend</code> или <code>&lt;файл&gt;_zondbe.npz</code> рядом</td><td>zondbe</td></tr><tr><td>Кэш физики</td><td>внутри <code>.blend</code> (Blend Cache) или файл рядом (Disk Cache)</td><td>physx</td></tr><tr><td>Пакетный рендер</td><td><code>&lt;файл&gt;_batch/&lt;задание&gt;/0001.png</code> …</td><td>studio</td></tr><tr><td>Манифест очереди</td><td><code>&lt;файл&gt;_batch/manifest.json</code> + текстовый блок «Batch Render»</td><td>studio</td></tr><tr><td>Битые кадры</td><td><code>&lt;файл&gt;_batch/&lt;задание&gt;/quarantine/</code></td><td>studio</td></tr><tr><td>Логи дочерних процессов</td><td><code>&lt;файл&gt;_batch/&lt;задание&gt;.log</code></td><td>studio</td></tr><tr><td>Снимки автосейва</td><td>папка снимков, ротация по возрасту</td><td>studio</td></tr><tr><td>Сборка проекта</td><td><code>&lt;Task ID&gt;_Blender&lt;версия&gt;_collect/</code></td><td>studio</td></tr><tr><td>Прилёты для счётчика</td><td>текстовый блок «zhb Collect Events»</td><td>animation</td></tr><tr><td>Отчёт конвертера физики</td><td>текстовый блок «Box3D Convert»</td><td>physx</td></tr><tr><td>Отчёт по сцене</td><td>текстовый блок «Scene Report»</td><td>studio</td></tr><tr><td>Трекинг и события для AE</td><td>JSON по указанному пути + JSX-импортёр</td><td>blae</td></tr></tbody></table></div>
+<p>Текстовые блоки открываются в <strong>Text Editor</strong>.</p>
+</section>
+<section id="7-когда-что-то-идёт-не-так"><h2>7. Когда что-то идёт не так</h2>
+<p><strong>Аддон не включается.</strong> Почти всегда — нет <code>zhb_core</code>. Сообщение в консоли</p>
+<p>говорит это прямо. Библиотека ставится как обычный аддон, но **галочку ей</p>
+<p>ставить не нужно**.</p>
+<p><strong>Вкладки нет в сайдбаре.</strong> Аддон не включён, либо включён, но упал при</p>
+<p>регистрации — смотрите системную консоль Blender.</p>
+<p><strong>Кнопка «Build Stack» серая.</strong> Не выбран источник: объект или непустая</p>
+<p>коллекция.</p>
+<p><strong>Толпа стоит на месте.</strong> Между спавном и зоной стена: поле течения упирается в</p>
+<p>неё, агенты читают нулевой вектор. Бейк об этом скажет и откажется, если только</p>
+<p>вы не переключили «Если прохода нет» на «Упираться в стену». Проверьте также,</p>
+<p>что объект с ролью Ground ровно один и спавнеры стоят на нём.</p>
+<p><strong>Толпа перестала расти на воротах.</strong> Кончился резерв. Поднимите **Gate Reserve</p>
+<p>Cap** или уменьшите множители — точное число бейк называет.</p>
+<p><strong>В бою все умирают в первый же кадр касания.</strong> Слишком маленькая пауза между</p>
+<p>попаданиями (<strong>Hit Every</strong>, в кадрах).</p>
+<p><strong>Тело проваливается сквозь пол.</strong> Меш-форма стоит на движущемся теле: Box3D</p>
+<p>создаёт меш-контакты только на статичных. Возьмите Compound.</p>
+<p><strong>Биты камеры отказываются печься.</strong> Либо у камеры уже есть свои ключи по</p>
+<p>location/rotation/lens — уберите их или анимируйте родителя камеры (для этого</p>
+<p>есть Camera Rig); либо два бита налезают переходами — разведите или укоротите</p>
+<p>переход.</p>
+<p><strong>Предметы не летят в корзины.</strong> В режиме By Kind у предмета и корзины должны</p>
+<p>совпадать значения свойства вида. Кого не разложило — сказано в отчёте</p>
+<p>оператора.</p>
+<p><strong>Рендер выглядит мылом.</strong> Активны прокси-текстуры. Верните оригиналы в</p>
+<p><strong>Texture Proxies</strong>.</p>
+<p><strong>Очередь рендера отрендерила не то.</strong> Снимок версии не помнит содержимое —</p>
+<p>материалы, позиции, модификаторы. Для таких версий сохраняйте отдельный <code>.blend</code></p>
+<p>и добавляйте его заданием-файлом.</p>
+<p><strong>Blender упал посреди очереди.</strong> Готовые кадры целы. В панели очереди будет</p>
+<p>красная кнопка возврата состояния сцены и подсказка включить «Дорендерить».</p>
+<p><strong>Профиль разошёлся с исходниками.</strong> <code>bash zhb_core/tools/install_all.sh --check</code></p>
+<p>скажет, какие пакеты отличаются, ничего не меняя.</p>
+</section>
+<section id="8-чего-аддоны-намеренно-не-делают"><h2>8. Чего аддоны намеренно не делают</h2>
+<ul class="rows">
+<li class=""><strong>Не ходят в сеть.</strong> Ни один. Обновление — переустановка архива или <code>git pull</code></li>
+</ul>
+<p>плюс установщик.</p>
+<ul class="rows">
+<li class=""><strong>Не считают физику и толпу во время рендера.</strong> Только читают готовый кэш.</li>
+<li class=""><strong>Не лезут друг к другу.</strong> Общие данные передаются файлами и свойствами сцены,</li>
+</ul>
+<p>а не вызовами.</p>
+<ul class="rows">
+<li class=""><strong>Не переименовывают свойства сохранённых сцен</strong> без миграции: под старыми</li>
+</ul>
+<p>именами лежат данные в уже сохранённых <code>.blend</code>.</p>
+<ul class="rows">
+<li class="button"><strong>Не угадывают там, где нет правильного ответа</strong> — отказываются и показывают,</li>
+</ul>
+<p>что именно непонятно.</p>
+</section>
+  <p class="miss" id="noresults" hidden>Ничего не нашлось. Попробуйте другое слово — поиск идёт по названиям панелей, кнопок и полей.</p>
+</main>
+</div>
+
+<script>
+(function () {
+  var q = document.getElementById("q");
+  var doc = document.getElementById("doc");
+  var none = document.getElementById("noresults");
+  var panels = Array.prototype.slice.call(doc.querySelectorAll(".panel"));
+  var sections = Array.prototype.slice.call(doc.querySelectorAll("section"));
+  var tocLinks = Array.prototype.slice.call(document.querySelectorAll("#toc a"));
+
+  q.addEventListener("input", function () {
+    var term = q.value.trim().toLowerCase();
+    if (!term) {
+      panels.forEach(function (p) { p.classList.remove("hidden"); });
+      sections.forEach(function (s) { s.classList.remove("hidden"); });
+      tocLinks.forEach(function (a) { a.classList.remove("hidden"); });
+      none.hidden = true;
+      return;
+    }
+    var hits = 0;
+    panels.forEach(function (p) {
+      var match = p.textContent.toLowerCase().indexOf(term) !== -1;
+      p.classList.toggle("hidden", !match);
+      if (match) hits++;
+    });
+    sections.forEach(function (s) {
+      if (s.querySelector(".panel")) {
+        s.classList.toggle("hidden", !s.querySelector(".panel:not(.hidden)"));
+        return;
+      }
+      var match = s.textContent.toLowerCase().indexOf(term) !== -1;
+      s.classList.toggle("hidden", !match);
+      if (match) hits++;
+    });
+    tocLinks.forEach(function (a) {
+      var target = document.getElementById(a.getAttribute("href").slice(1));
+      var host = target && (target.closest(".panel") || target.closest("section") || target);
+      a.classList.toggle("hidden", !!(host && host.classList.contains("hidden")));
+    });
+    none.hidden = hits > 0;
+  });
+
+  var byId = {};
+  tocLinks.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+  var spy = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var link = byId[entry.target.id];
+      if (!link) return;
+      tocLinks.forEach(function (a) { a.classList.remove("on"); });
+      link.classList.add("on");
+    });
+  }, { rootMargin: "0px 0px -75% 0px", threshold: 0 });
+  doc.querySelectorAll("section[id], h3[id], .panel[id]").forEach(function (el) { spy.observe(el); });
+})();
+</script>
+</body>
+</html>
